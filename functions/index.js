@@ -68,6 +68,9 @@ exports.notifyNewMessage = functions.firestore
     const photoUrl = message["photoUrl"];
     const senderId = message["senderId"];
     const receiverId = message["receiverId"];
+    const id = docSnapshot.id
+
+    // TODO: send notification id
 
     return admin
       .firestore()
@@ -88,7 +91,8 @@ exports.notifyNewMessage = functions.firestore
                 date: `${new Date()}`,
                 photoUrl: photoUrl,
                 senderId: senderId,
-                receiverId: receiverId
+                receiverId: receiverId,
+                id: id
             },
         };
 
