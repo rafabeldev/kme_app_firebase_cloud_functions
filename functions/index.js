@@ -3,74 +3,19 @@ const admin = require('firebase-admin');
  
 admin.initializeApp(functions.config().functions);
  
-// var newData;
- 
-// exports.notifyNewMessage = functions.firestore.document('notifications/{id}').onCreate(async (snapshot, context) => {
-//     //
-//     if (snapshot.empty) {
-//         console.log('No Devices');
-//         return;
-//     }
-    
-//     // Get data from snapshot
-//     let newData = snapshot.data();
-
-//     console.log('this is the new data',newData)
- 
-//     // const deviceIdTokens = await admin
-//     //     .firestore()
-//     //     .collection('notifications')
-//     //     .get();
-
-//     // console.log('tokens', deviceIdTokens.docs)
- 
-//     var tokens = [];
- 
-//     for (var token of deviceIdTokens.docs) {
-//         tokens.push(token.data().device_token);
-//     }
-//     var payload = {
-//         notification: {
-//             title: 'Push Title',
-//             body: 'Push Body',
-//             sound: 'default',
-//         },
-//         data: {
-//             // push_key: 'Push Key Value',
-//             key1: newData.data,
-//             seen: false,
-//             date: new Date(),
-//             photoUrl: 'http://mispolainas.com',
-//             senderId: "jaishdfpa",
-//             receiverId: "CuGDCIopoiGBn"
-
-//         },
-//     };
- 
-//     try {
-//         // admin.messaging().
-//         const response = await admin.messaging().sendToDevice(tokens, payload);
-//         console.log('Notification sent successfully');
-//     } catch (err) {
-//         console.log(err);
-//     }
-// });
-
-
-
-// j;alskdfj;laksdj;f
 exports.notifyNewMessage = functions.firestore
   .document("/notifications/{id}")
   .onCreate((docSnapshot, context) => {
     const message = docSnapshot.data();
-    const title = docSnapshot.data()["title"];
-    const body = message["body"];
-    const photoUrl = message["photoUrl"];
+
+    const title = message["title"];
+    const body = message["body"] || "";
+    const photoUrl = message["photoUrl"] || "";
     const senderId = message["senderId"];
     const receiverId = message["receiverId"];
+    const redirectTo = message["redirectTo"];
+    const seen = message["seen"] || "0";
     const id = docSnapshot.id
-
-    // TODO: send notification id
 
     return admin
       .firestore()
@@ -82,16 +27,15 @@ exports.notifyNewMessage = functions.firestore
             notification: {
                 title: title,
                 body: body,
-                image: photoUrl
+                image: photoUrl,
             },
             data: {
-                // push_key: 'Push Key Value',
-                // key1: newData.data,
-                seen: "false",
-                date: `${new Date()}`,
-                photoUrl: photoUrl,
-                senderId: senderId,
-                receiverId: receiverId,
+                seen: `${seen}`,
+                date: `${new Date().toISOString()}`,
+                photoUrl,
+                senderId,
+                receiverId,
+                redirectTo,
                 id: id
             },
         };
