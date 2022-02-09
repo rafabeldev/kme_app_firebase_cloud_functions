@@ -11,9 +11,9 @@ exports.notifyNewMessage = functions.firestore
     const title = message["title"];
     const body = message["body"] || "";
     const photoUrl = message["photoUrl"] || "";
-    const senderId = message["senderId"];
+    const senderId = message["senderId"] || "";
     const receiverId = message["receiverId"];
-    const redirectTo = message["redirectTo"];
+    const redirectTo = message["redirectTo"] || "";
     const seen = message["seen"] || "0";
     const id = docSnapshot.id
 
