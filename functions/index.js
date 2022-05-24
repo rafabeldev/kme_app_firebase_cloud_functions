@@ -15,6 +15,8 @@ exports.notifyNewMessage = functions.firestore
     const receiverId = message["receiverId"];
     const redirectTo = message["redirectTo"] || "";
     const seen = message["seen"] || "0";
+    const client = message["client"] || "";
+    const messageId = message["messageId"] || "";
     const id = docSnapshot.id
 
     return admin
@@ -36,6 +38,8 @@ exports.notifyNewMessage = functions.firestore
                 senderId,
                 receiverId,
                 redirectTo,
+                client,
+                messageId,
                 id: id
             },
         };
