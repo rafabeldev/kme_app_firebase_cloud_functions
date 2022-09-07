@@ -1,7 +1,13 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const express = require('express');
+const cors = require('cors');
+const app = express();
  
 admin.initializeApp(functions.config().functions);
+
+// Automatically allow cross-origin requests
+app.use(cors({ origin: true }));
  
 exports.notifyNewMessage = functions.firestore
   .document("/notifications/{id}")
@@ -18,10 +24,9 @@ exports.notifyNewMessage = functions.firestore
     const client = message["client"] || "";
     const messageId = message["messageId"] || "";
     const id = docSnapshot.id
-
     return admin
       .firestore()
-      .doc("users/" + receiverId)
+      .doc('users/'+receiverId+'@'+client)
       .get()
       .then((userDoc) => {
         const registrationTokens = userDoc.get("deviceTokens");
@@ -39,7 +44,7 @@ exports.notifyNewMessage = functions.firestore
                 receiverId,
                 redirectTo,
                 client,
-                messageId,
+                messageId: `${messageId}`,
                 id: id
             },
         };
@@ -73,11 +78,78 @@ exports.notifyNewMessage = functions.firestore
             });
             return admin
               .firestore()
-              .doc("users/" + receiverId)
+              .doc('users/'+receiverId+'@'+client)
               .update({
                 deviceTokens: stillRegisteredTokens,
               });
           });
       });
   });
+
+  // // Register an HTTP function with the Functions Framework
+  // exports.insertStatisticsToFirestore = functions.https('insertStatisticsToFirestore', (req, res) => {
+  //   const reqData = req.body;
+  //   const action = reqData["action"];
+  //   const buttonID = reqData["buttonID"];
+  //   const date = reqData["date"];
+  //   const user = reqData["user"];
+  //   const client = reqData["client"];
+  //   // Your code here
+  //   try {
+  //     admin
+  //       .firestore()
+  //       .collection('statistics')
+  //       .add({
+  //         'client': client,
+  //         'action': action,
+  //         'buttonID': buttonID,
+  //         'user': user,
+  //         'date': date,
+  //       })
+  //       .then((value) => {
+  //         console.log("Record saved to statistics collection.");
+  //         return res.send('Record saved to statistics collection.');
+  //       })
+  //       .catchError((error) => {
+  //         console.log('Failed to insert data in statistics collection: $error');
+  //         return res.send('Failed to insert data in statistics collection: $error');
+  //       });
+  //   } catch (e) {
+  //     const errorCode = e.code;
+  //     const msg = "Something went wrong, please try again later";
+  //     return res.send(`${errorCode} ${msg} ${JSON.stringify(e)}`)
+  //   }
+  // });
+
+  app.post('/insertStatisticsToFirestore', (req, res) => {
+    const reqData = req.body;
+    const action = reqData["action"];
+    const buttonID = reqData["buttonID"];
+    const date = reqData["date"];
+    const user = reqData["user"];
+    const client = reqData["client"];
+    try {
+      admin
+        .firestore()
+        .collection('statistics')
+        .add({
+          'client': client,
+          'action': action,
+          'buttonID': buttonID,
+          'user': user,
+          'date': date,
+        }).then((value) => 
+          res.status(200).send("Received POST request: inserted data in statistics collection!")
+          ).catchError((error) => res.status(400).send("Failed to insert data in statistics collection: $error"));
+        return res.status(200).send("Received POST request: inserted data in statistics collection!")
+    } catch (e) {
+      const errorCode = e.code;
+      const msg = "Something went wrong, please try again later";
+      return res.status(400).send(`${errorCode} ${msg} ${JSON.stringify(e)}`);
+    }
+
+  });
+  
+  // Expose Express API as a single Cloud Function:
+  exports.widgets = functions.https.onRequest(app);
 
