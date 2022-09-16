@@ -23,7 +23,22 @@ exports.notifyNewMessage = functions.firestore
     const seen = message["seen"] || "0";
     const client = message["client"] || "";
     const messageId = message["messageId"] || "";
+    const messageDate = message["date"] || `${new Date().toISOString()}`;
     const id = docSnapshot.id
+
+    try {
+      admin
+        .firestore()
+        .collection('notifications')
+        .doc(id)
+        .update({
+          date: messageDate,    
+          isDeleted: false,    
+        }).then((value) => (console.log("Date updated successfully!"))).catchError((error) => console.log("Something went wrong, please try again later", error));
+    } catch (e) {
+      console.log("Something went wrong, please try again later", e);
+    }
+    
     return admin
       .firestore()
       .doc('users/'+receiverId+'@'+client)
