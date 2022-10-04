@@ -33,7 +33,8 @@ exports.notifyNewMessage = functions.firestore
         .doc(id)
         .update({
           date: messageDate,    
-          isDeleted: false,    
+          isDeleted: false,
+          notificationId: id    
         }).then((value) => (console.log("Date updated successfully!"))).catchError((error) => console.log("Something went wrong, please try again later", error));
     } catch (e) {
       console.log("Something went wrong, please try again later", e);
@@ -52,6 +53,7 @@ exports.notifyNewMessage = functions.firestore
                 image: photoUrl,
             },
             data: {
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
                 seen: `${seen}`,
                 date: `${new Date().toISOString()}`,
                 photoUrl,
