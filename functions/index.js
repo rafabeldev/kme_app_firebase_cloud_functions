@@ -15,7 +15,7 @@ exports.notifyNewMessage = functions.firestore
     const message = docSnapshot.data();
 
     const title = message["title"];
-    const body = message["body"] || "";
+    const body = message["body"].includes("<!DOCTYPE html") ? "" : message["body"];
     const photoUrl = message["photoUrl"] || "";
     const senderId = message["senderId"] || "";
     const receiverId = message["receiverId"];
