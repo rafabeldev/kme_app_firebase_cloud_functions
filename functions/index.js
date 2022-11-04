@@ -18,7 +18,7 @@ exports.notifyNewMessage = functions.firestore
     const body = message["body"].includes("<!DOCTYPE html") ? "" : message["body"];
     const photoUrl = message["photoUrl"] || "";
     const senderId = message["senderId"] || "";
-    const receiverId = message["receiverId"];
+    const receiverId = message["receiverId"].includes("@") ? message["receiverId"].split("@")[0] : message["receiverId"];
     const redirectTo = message["redirectTo"] || "";
     const seen = message["seen"] || "0";
     const client = message["client"] || "";
@@ -32,6 +32,7 @@ exports.notifyNewMessage = functions.firestore
         .collection('notifications')
         .doc(id)
         .update({
+          receiverId: receiverId,
           date: messageDate,    
           isDeleted: false,
           notificationId: id    
